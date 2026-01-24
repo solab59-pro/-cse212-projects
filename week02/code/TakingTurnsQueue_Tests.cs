@@ -11,7 +11,9 @@ public class TakingTurnsQueueTests
     // Scenario: Create a queue with the following people and turns: Bob (2), Tim (5), Sue (3) and
     // run until the queue is empty
     // Expected Result: Bob, Tim, Sue, Bob, Tim, Sue, Tim, Sue, Tim, Tim
-    // Defect(s) Found: 
+    // Defect(s) Found: Assert.AreEqual failed. Expected:<Bob>. Actual:<Sue>
+    // 1. A person with 1 remaining turn is not re-enqueued correctly.
+    // 2. The current logic only re-enqueues when Turns > 1, causing players to be removed one turn too early.
     public void TestTakingTurnsQueue_FiniteRepetition()
     {
         var bob = new Person("Bob", 2);
@@ -43,7 +45,9 @@ public class TakingTurnsQueueTests
     // Scenario: Create a queue with the following people and turns: Bob (2), Tim (5), Sue (3)
     // After running 5 times, add George with 3 turns.  Run until the queue is empty.
     // Expected Result: Bob, Tim, Sue, Bob, Tim, Sue, Tim, George, Sue, Tim, George, Tim, George
-    // Defect(s) Found: 
+    // Defect(s) Found: Assert.AreEqual failed. Expected:<Bob>. Actual:<Sue>
+    // 1. A person with 1 remaining turn is not re-enqueued correctly. That is, incorrect handling of the last turn
+    // 2. Causes the queue order to break when a new person is added mid-execution.
     public void TestTakingTurnsQueue_AddPlayerMidway()
     {
         var bob = new Person("Bob", 2);
@@ -85,7 +89,10 @@ public class TakingTurnsQueueTests
     // Scenario: Create a queue with the following people and turns: Bob (2), Tim (Forever), Sue (3)
     // Run 10 times.
     // Expected Result: Bob, Tim, Sue, Bob, Tim, Sue, Tim, Sue, Tim, Tim
-    // Defect(s) Found: 
+    // Defect(s) Found: Assert.AreEqual failed. Expected:<Bob>. Actual:<Sue>
+    // 1. A person with 0 turns (infinite) is treated as having no turns left and is removed.
+    // 2. Infinite-turn players should always be re-enqueued.
+    // 3. Turns value for infinite players must never be modified.
     public void TestTakingTurnsQueue_ForeverZero()
     {
         var timTurns = 0;
@@ -116,7 +123,9 @@ public class TakingTurnsQueueTests
     // Scenario: Create a queue with the following people and turns: Tim (Forever), Sue (3)
     // Run 10 times.
     // Expected Result: Tim, Sue, Tim, Sue, Tim, Sue, Tim, Tim, Tim, Tim
-    // Defect(s) Found: 
+    // Defect(s) Found: Asset.AreEqual failed. Expected:<Tim>. Actual:<Sue>
+    // 1. Same issue as zero turns: negative turns should mean infinite, but the code removes them.
+    // 2. Infinite players must stay in the queue forever and retain their original turn value.
     public void TestTakingTurnsQueue_ForeverNegative()
     {
         var timTurns = -3;
@@ -143,7 +152,7 @@ public class TakingTurnsQueueTests
     [TestMethod]
     // Scenario: Try to get the next person from an empty queue
     // Expected Result: Exception should be thrown with appropriate error message.
-    // Defect(s) Found: 
+    // Defect(s) Found: No defects found
     public void TestTakingTurnsQueue_Empty()
     {
         var players = new TakingTurnsQueue();
